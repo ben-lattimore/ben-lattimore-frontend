@@ -12,7 +12,7 @@ export default function ImageCarousel({ images }: { images: any[] | null }) {
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 500);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [images]);
@@ -26,14 +26,16 @@ export default function ImageCarousel({ images }: { images: any[] | null }) {
       {images.map((image, index) => (
         <div
           key={index}
-          className={`absolute inset-0 ${index === currentIndex ? 'block' : 'hidden'}`}
+          className={`absolute inset-0 flex items-center justify-center ${
+            index === currentIndex ? 'block' : 'hidden'
+          }`}
         >
           <Image
-            src={urlFor(image).width(1000).height(1000).url()}
+            src={urlFor(image).url()}
             alt={`Project image ${index + 1}`}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            style={{ objectFit: 'contain' }}
+            style={{ objectFit: 'contain', maxWidth: '100%', maxHeight: '100%' }}
+            width={1000}
+            height={1000}
           />
         </div>
       ))}

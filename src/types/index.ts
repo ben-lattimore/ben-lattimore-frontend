@@ -18,7 +18,7 @@ export interface ProjectData {
   clientName: string;
   description: string;
   technologyUsed: string[];
-  projectUrl?: string;
+  url?: string;
   projectImages?: {
     _type: 'image';
     asset: {

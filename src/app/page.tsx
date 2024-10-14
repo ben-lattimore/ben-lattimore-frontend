@@ -15,7 +15,7 @@ async function getData() {
     clientName,
     description,
     technologyUsed,
-    projectUrl,
+    url,
     projectImages
   }`;
 
@@ -60,7 +60,7 @@ export default function Home() {
           </section>
         
         <div className="p-8 pb-20 sm:p-20 flex flex-col sm:flex-row gap-16">
-          <section className="mt-16 sm:w-1/2">
+          <section className="sm:w-1/2">
             {projects.map((project) => (
               <ProjectCard 
                 key={project._id} 
@@ -70,7 +70,7 @@ export default function Home() {
             ))}
           </section>
 
-          <div className="sm:w-1/2 relative sticky top-20 h-[600px]">
+          <div className="sm:w-1/2 relative fixed -top-36 h-[600px]">
             <ImageCarousel images={hoveredImages} />
           </div>          
         </div>

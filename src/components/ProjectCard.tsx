@@ -19,15 +19,22 @@ export default function ProjectCard({
       whileHover={{ x: 40 }}
       transition={{ duration: 0.3 }}
     >
-      <h3 className="text-2xl font-semibold inline-block mr-2">
-        {project.clientName}
-      </h3>
-      <span className="text-lg">
-        {Array.isArray(project.technologyUsed) ? project.technologyUsed.join(", ") : project.technologyUsed}
-      </span>
-      {project.projectUrl && (
+      <Link 
+        href={project.url} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="inline-block"
+      >
+        <h3 className="text-2xl font-semibold inline-block mr-16">
+          {project.clientName}
+        </h3>
+        <span className="text-lg block">
+          {Array.isArray(project.technologyUsed) ? project.technologyUsed.join(", ") : project.technologyUsed}
+        </span>
+      </Link>
+      {project.url && (
         <Link 
-          href={project.projectUrl} 
+          href={project.url} 
           target="_blank" 
           rel="noopener noreferrer" 
           className="absolute inset-0 z-10 cursor-pointer"
