@@ -13,7 +13,7 @@ export default function ProjectCard({
 }) {
   return (
     <motion.div 
-      className="mb-16 relative h-[300px]"
+      className="mb-16 relative"
       onMouseEnter={() => onHover(project.projectImages)}
       onMouseLeave={() => onHover(null)}
       whileHover={{ x: 40 }}

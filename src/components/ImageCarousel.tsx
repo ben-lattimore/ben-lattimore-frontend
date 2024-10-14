@@ -8,7 +8,7 @@ export default function ImageCarousel({ images }: { images: any[] | null }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    if (!images) return;
+    if (!images || images.length === 0) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -17,10 +17,12 @@ export default function ImageCarousel({ images }: { images: any[] | null }) {
     return () => clearInterval(interval);
   }, [images]);
 
-  if (!images || images.length === 0) return null;
+  if (!images || images.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="fixed right-0 top-0 w-1/2 h-screen">
+    <div className="relative w-full h-full">
       {images.map((image, index) => (
         <div
           key={index}
@@ -29,8 +31,9 @@ export default function ImageCarousel({ images }: { images: any[] | null }) {
           <Image
             src={urlFor(image).width(1000).height(1000).url()}
             alt={`Project image ${index + 1}`}
-            layout="fill"
-            objectFit="cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            style={{ objectFit: 'contain' }}
           />
         </div>
       ))}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { client } from "@/lib/sanity";
 import { HomeData, ProjectData } from "@/types";
@@ -27,9 +27,9 @@ async function getData() {
 
 export default function Home() {
   const [data, setData] = useState<{ home: HomeData; projects: ProjectData[] } | null>(null);
-  const [hoveredImages, setHoveredImages] = useState<any[] | null>(null);
+  const [hoveredImages, setHoveredImages] = useState<any[] | null>([]);
 
-  useState(() => {
+  useEffect(() => {
     getData().then(setData);
   }, []);
 
@@ -38,38 +38,43 @@ export default function Home() {
   const { home, projects } = data;
 
   return (
-    <main className="min-h-screen p-8 pb-20 sm:p-20 flex flex-col gap-16">
-      <section className="flex flex-col sm:flex-row justify-between items-start">
-        <div className="max-w-2xl">
-          <PortableText
-            value={home.main_text}
-            components={{
-              block: ({ children }) => <p className="text-lg mb-4">{children}</p>,
-            }}
-          />
-        </div>
-        <div className="flex flex-row justify-end gap-x-2 mt-4 sm:mt-0">
-          <a href={home.linkedin.url} target="_blank" rel="noopener noreferrer" className="text-brand-off-black hover:text-brand-off-black underline decoration-1 underline-offset-4">
-            {home.linkedin.text}
-          </a>
-          <span className="mx-1"></span>
-          <a href={`mailto:${home.email.address}`} className="text-brand-off-black hover:text-brand-off-black underline decoration-1 underline-offset-4">
-            {home.email.text}
-          </a>
-        </div>
-      </section>
+    <main className="min-h-screen flex justify-center">
+      <div className="w-full xl:w-[1280px] mx-auto">
+          <section className="flex flex-col sm:flex-row justify-between items-start xl:w-full p-8 pb-20 sm:p-20 ">
+            <div className='xl:w-7/12'>
+              <PortableText
+                value={home.main_text}
+                components={{
+                  block: ({ children }) => <p className="text-lg mb-4">{children}</p>,
+                }}
+              />
+            </div>
+            <div className="flex flex-row justify-end gap-x-2 mt-4 sm:mt-0">
+              <a href={home.linkedin.url} target="_blank" rel="noopener noreferrer" className="text-brand-off-black hover:text-brand-off-black underline decoration-1 underline-offset-4">
+                {home.linkedin.text}
+              </a>
+              <a href={`mailto:${home.email.address}`} className="text-brand-off-black hover:text-brand-off-black underline decoration-1 underline-offset-4 ml-2">
+                {home.email.text}
+              </a>
+            </div>
+          </section>
+        
+        <div className="p-8 pb-20 sm:p-20 flex flex-col sm:flex-row gap-16">
+          <section className="mt-16 sm:w-1/2">
+            {projects.map((project) => (
+              <ProjectCard 
+                key={project._id} 
+                project={project} 
+                onHover={(images) => setHoveredImages(images || [])}
+              />
+            ))}
+          </section>
 
-      <section className="mt-16">
-        {projects.map((project) => (
-          <ProjectCard 
-            key={project._id} 
-            project={project} 
-            onHover={(images) => setHoveredImages(images)}
-          />
-        ))}
-      </section>
-
-      <ImageCarousel images={hoveredImages} />
+          <div className="sm:w-1/2 relative sticky top-20 h-[600px]">
+            <ImageCarousel images={hoveredImages} />
+          </div>          
+        </div>
+      </div>
     </main>
   );
 }
