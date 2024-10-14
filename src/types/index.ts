@@ -1,6 +1,8 @@
+import { PortableTextBlock } from '@portabletext/types'
+
 export interface HomeData {
   name: string;
-  main_text: any[]; // Assuming 'array' of 'block' type from Sanity translates to any[] in TypeScript
+  main_text: PortableTextBlock[]; // Use PortableTextBlock instead of any
   linkedin: {
     text: string;
     url: string;
@@ -11,11 +13,17 @@ export interface HomeData {
   };
 }
   
-  export interface ProjectData {
-    _id: string;
-    clientName: string;
-    description: string;
-    technologyUsed: string[];
-    projectUrl?: string;
-    images?: any[]; // You might want to define a more specific type for images
-  }
+export interface ProjectData {
+  _id: string;
+  clientName: string;
+  description: string;
+  technologyUsed: string[];
+  projectUrl?: string;
+  projectImages?: {
+    _type: 'image';
+    asset: {
+      _ref: string;
+      _type: 'reference';
+    };
+  }[];
+}

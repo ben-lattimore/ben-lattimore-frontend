@@ -5,7 +5,14 @@ import { PortableText } from '@portabletext/react';
 
 async function getData() {
   const homeQuery = `*[_type == "home"][0]`;
-  const projectsQuery = `*[_type == "project"] | order(order asc)`;
+  const projectsQuery = `*[_type == "project"] | order(order asc) {
+    _id,
+    clientName,
+    description,
+    technologyUsed,
+    projectUrl,
+    projectImages
+  }`;
 
   const home = await client.fetch<HomeData>(homeQuery);
   const projects = await client.fetch<ProjectData[]>(projectsQuery);
@@ -40,7 +47,7 @@ export default async function Home() {
 
         <section className="mt-16">
           <h2 className="text-3xl font-bold mb-8">Projects</h2>
-          {projects.map((project, index) => (
+          {projects.map((project) => (
             <div key={project._id} className="mb-16 flex flex-col lg:flex-row">
               <div className="lg:w-1/2 pr-8">
                 <h3 className="text-2xl font-semibold mb-2">{project.clientName}</h3>
@@ -54,15 +61,20 @@ export default async function Home() {
                   </a>
                 )}
               </div>
-              <div className="lg:w-1/2 mt-4 lg:mt-0 hidden lg:block">
-                {project.images && project.images.length > 0 && (
-                  <Image
-                    src={urlFor(project.images[0]).url()}
-                    alt={`${project.clientName} project`}
-                    width={500}
-                    height={300}
-                    className="rounded-lg object-cover"
-                  />
+              <div className="lg:w-1/2 mt-4 lg:mt-0">
+                {project.projectImages && project.projectImages.length > 0 && (
+                  <div className="flex overflow-x-auto gap-4">
+                    {project.projectImages.map((image, imageIndex) => (
+                      <Image
+                        key={imageIndex}
+                        src={urlFor(image).width(500).height(300).url()}
+                        alt={`${project.clientName} project image ${imageIndex + 1}`}
+                        width={500}
+                        height={300}
+                        className="rounded-lg object-cover flex-shrink-0"
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
