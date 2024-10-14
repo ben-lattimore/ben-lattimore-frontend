@@ -19,6 +19,7 @@ export interface ProjectData {
   description: string;
   technologyUsed: string[];
   url?: string;
+  backgroundColor: string;
   projectImages?: {
     _type: 'image';
     asset: {
@@ -26,4 +27,5 @@ export interface ProjectData {
       _type: 'reference';
     };
   }[];
+  reverseTextColor?: boolean;
 }

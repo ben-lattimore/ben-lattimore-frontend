@@ -12,7 +12,7 @@ export default function ImageCarousel({ images }: { images: any[] | null }) {
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 1000);
+    }, 900);
 
     return () => clearInterval(interval);
   }, [images]);

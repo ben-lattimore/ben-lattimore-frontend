@@ -9,13 +9,13 @@ export default function ProjectCard({
   onHover 
 }: { 
   project: ProjectData; 
-  onHover: (images: any[] | null) => void;
+  onHover: (images: any[] | null, backgroundColor: string | null, reverseTextColor: boolean) => void;
 }) {
   return (
     <motion.div 
-      className="mb-16 relative"
-      onMouseEnter={() => onHover(project.projectImages)}
-      onMouseLeave={() => onHover(null)}
+      className="pb-16 relative"
+      onMouseEnter={() => onHover(project.projectImages, project.backgroundColor, project.reverseTextColor || false)}
+      onMouseLeave={() => onHover(null, null, false)}
       whileHover={{ x: 40 }}
       transition={{ duration: 0.3 }}
     >
@@ -25,10 +25,10 @@ export default function ProjectCard({
         rel="noopener noreferrer" 
         className="inline-block"
       >
-        <h3 className="text-2xl font-semibold inline-block mr-16">
+        <h3 className="text-xl font-semibold inline-block mr-16">
           {project.clientName}
         </h3>
-        <span className="text-lg block">
+        <span className="text-base block">
           {Array.isArray(project.technologyUsed) ? project.technologyUsed.join(", ") : project.technologyUsed}
         </span>
       </Link>
