@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { client, urlFor } from "@/lib/sanity";
 import { HomeData, ProjectData } from "@/types";
@@ -56,9 +57,9 @@ export default async function Home() {
                 <strong>Technologies:</strong> {Array.isArray(project.technologyUsed) ? project.technologyUsed.join(", ") : project.technologyUsed}
               </div>
               {project.projectUrl && (
-                <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="text-brand-off-black hover:underline">
+                <Link href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="text-brand-off-black hover:underline">
                   View Project
-                </a>
+                </Link>
               )}
             </div>
             <div className="lg:w-1/2 mt-4 lg:mt-0">
