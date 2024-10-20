@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import Link from "next/link";
 import { client } from "@/lib/sanity";
 import { HomeData, ProjectData } from "@/types";
 import { PortableText } from '@portabletext/react';

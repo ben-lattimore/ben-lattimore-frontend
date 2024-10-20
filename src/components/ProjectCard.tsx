@@ -3,18 +3,19 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ProjectData } from '@/types';
+import { ImageAsset } from '@/types';
 
 export default function ProjectCard({ 
   project, 
   onHover 
 }: { 
   project: ProjectData; 
-  onHover: (images: any[] | null, backgroundColor: string | null, reverseTextColor: boolean) => void;
+  onHover: (images: ImageAsset[] | null, backgroundColor: string | null, reverseTextColor: boolean) => void;
 }) {
   return (
     <motion.div 
       className="pb-16 relative"
-      onMouseEnter={() => onHover(project.projectImages, project.backgroundColor, project.reverseTextColor || false)}
+      onMouseEnter={() => onHover(project.projectImages ?? null, project.backgroundColor, project.reverseTextColor || false)}
       onMouseLeave={() => onHover(null, null, false)}
       whileHover={{ x: 40 }}
       transition={{ duration: 0.3 }}

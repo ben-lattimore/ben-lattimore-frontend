@@ -12,7 +12,15 @@ export interface HomeData {
     address: string;
   };
 }
-  
+
+export interface ImageAsset {
+  _type: 'image';
+  asset: {
+    _ref: string;
+    _type: 'reference';
+  };
+}
+
 export interface ProjectData {
   _id: string;
   clientName: string;
@@ -20,12 +28,6 @@ export interface ProjectData {
   technologyUsed: string[];
   url?: string;
   backgroundColor: string;
-  projectImages?: {
-    _type: 'image';
-    asset: {
-      _ref: string;
-      _type: 'reference';
-    };
-  }[];
+  projectImages?: ImageAsset[]; // Updated to use ImageAsset
   reverseTextColor?: boolean;
 }
