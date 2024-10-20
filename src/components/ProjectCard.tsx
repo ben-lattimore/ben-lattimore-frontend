@@ -21,7 +21,7 @@ export default function ProjectCard({
       transition={{ duration: 0.3 }}
     >
       <Link 
-        href={project.url} 
+        href={project.url ?? '#'} 
         target="_blank" 
         rel="noopener noreferrer" 
         className="inline-block"
