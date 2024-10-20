@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion';
+import { useState } from 'react';
 import Link from 'next/link';
 import { ProjectData } from '@/types';
 import { ImageAsset } from '@/types';
@@ -12,26 +12,43 @@ export default function ProjectCard({
   project: ProjectData; 
   onHover: (images: ImageAsset[] | null, backgroundColor: string | null, reverseTextColor: boolean) => void;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    onHover(project.projectImages ?? null, project.backgroundColor, project.reverseTextColor || false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    onHover(null, null, false);
+  };
+
   return (
-    <motion.div 
+    <div 
       className="pb-16 relative"
-      onMouseEnter={() => onHover(project.projectImages ?? null, project.backgroundColor, project.reverseTextColor || false)}
-      onMouseLeave={() => onHover(null, null, false)}
-      whileHover={{ x: 40 }}
-      transition={{ duration: 0.3 }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Link 
         href={project.url ?? '#'} 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="inline-block"
+        className="inline-block w-full overflow-hidden"
       >
-        <h3 className="text-xl font-semibold inline-block mr-16">
-          {project.clientName}
-        </h3>
-        <span className="text-base block">
-          {Array.isArray(project.technologyUsed) ? project.technologyUsed.join(", ") : project.technologyUsed}
-        </span>
+        <div 
+          style={{
+            transform: isHovered ? 'translateX(40px)' : 'translateX(0)',
+            transition: 'transform 0.3s ease-in-out',
+          }}
+        >
+          <h3 className="text-xl font-semibold inline-block mr-16">
+            {project.clientName}
+          </h3>
+          <span className="text-base block">
+            {Array.isArray(project.technologyUsed) ? project.technologyUsed.join(", ") : project.technologyUsed}
+          </span>
+        </div>
       </Link>
       {project.url && (
         <Link 
@@ -43,6 +60,6 @@ export default function ProjectCard({
           <span className="sr-only">View Project</span>
         </Link>
       )}
-    </motion.div>
+    </div>
   );
 }
