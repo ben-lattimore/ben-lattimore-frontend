@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { client } from "@/lib/sanity";
-import { HomeData, ProjectData } from "@/types";
+import { HomeData, ProjectData, ImageAsset } from "@/types";
 import { PortableText } from '@portabletext/react';
 import ProjectCard from '@/components/ProjectCard';
 import ImageCarousel from '@/components/ImageCarousel';
@@ -32,7 +32,7 @@ async function getData() {
 
 export default function Home() {
   const [data, setData] = useState<{ home: HomeData; projects: ProjectData[] } | null>(null);
-  const [hoveredImages, setHoveredImages] = useState<any[] | null>([]);
+  const [hoveredImages, setHoveredImages] = useState<ImageAsset[] | null>(null);
   const [backgroundColor, setBackgroundColor] = useState<string | null>(null);
   const [reverseTextColor, setReverseTextColor] = useState<boolean>(false);
 
@@ -73,7 +73,7 @@ export default function Home() {
                 key={project._id} 
                 project={project} 
                 onHover={(images, bgColor, reverse) => {
-                  setHoveredImages(images || []);
+                  setHoveredImages(images);
                   setBackgroundColor(bgColor);
                   setReverseTextColor(reverse);
                 }}
