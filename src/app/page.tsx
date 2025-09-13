@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { client } from "@/lib/sanity";
-import { HomeData, ProjectData, ImageAsset } from "@/types";
+import { HomeData, ProjectData } from "@/types";
 import { PortableText } from '@portabletext/react';
 import ProjectCard from '@/components/ProjectCard';
-import ImageCarousel from '@/components/ImageCarousel';
 import { getTextColorClass } from '@/utils/colorUtils';
 
 // Add this line after the import
@@ -19,7 +18,6 @@ async function getData() {
     description,
     technologyUsed,
     url,
-    projectImages,
     backgroundColor,
     reverseTextColor
   }`;
@@ -32,7 +30,6 @@ async function getData() {
 
 export default function Home() {
   const [data, setData] = useState<{ home: HomeData; projects: ProjectData[] } | null>(null);
-  const [hoveredImages, setHoveredImages] = useState<ImageAsset[] | null>(null);
   const [backgroundColor, setBackgroundColor] = useState<string | null>(null);
   const [reverseTextColor, setReverseTextColor] = useState<boolean>(false);
 
@@ -66,24 +63,19 @@ export default function Home() {
           </div>
         </section>
         
-        <div className="p-8 pb-20 sm:p-20 flex flex-col sm:flex-row gap-16">
-          <section className="sm:w-1/2">
+        <div className="p-8 pb-20 sm:p-20">
+          <section>
             {projects.map((project) => (
               <ProjectCard 
                 key={project._id} 
                 project={project} 
-                onHover={(images, bgColor, reverse) => {
-                  setHoveredImages(images);
+                onHover={(bgColor, reverse) => {
                   setBackgroundColor(bgColor);
                   setReverseTextColor(reverse);
                 }}
               />
             ))}
           </section>
-
-          <div className="hidden sm:block sm:w-1/2 relative fixed -top-36 h-[600px]">
-            <ImageCarousel images={hoveredImages} />
-          </div>          
         </div>
       </div>
     </main>

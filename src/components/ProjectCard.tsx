@@ -3,25 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ProjectData } from '@/types';
-import { ImageAsset } from '@/types';
 
 export default function ProjectCard({ 
   project, 
   onHover 
 }: { 
   project: ProjectData; 
-  onHover: (images: ImageAsset[] | null, backgroundColor: string | null, reverseTextColor: boolean) => void;
+  onHover: (backgroundColor: string | null, reverseTextColor: boolean) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    onHover(project.projectImages ?? null, project.backgroundColor, project.reverseTextColor || false);
+    onHover(project.backgroundColor, project.reverseTextColor || false);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    onHover(null, null, false);
+    onHover(null, false);
   };
 
   return (
