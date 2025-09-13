@@ -21,4 +21,5 @@ export interface ProjectData {
   url?: string;
   backgroundColor: string;
   reverseTextColor?: boolean;
+  category: 'AI' | 'Web Development';
 }
