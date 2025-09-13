@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex justify-center transition-all duration-300" style={{ backgroundColor: backgroundColor || 'initial' }}>
-      <div className={`w-full xl:w-[1280px] mx-auto transition-all duration-300 ${getTextColorClass(reverseTextColor)}`}>
+      <div className={`w-full xl:w-[1600px] mx-auto transition-all duration-300 ${getTextColorClass(reverseTextColor)}`}>
         <section className="flex flex-col sm:flex-row justify-between items-start xl:w-full p-8 pb-20 sm:p-20 ">
           <div className='xl:w-7/12'>
             <PortableText
