@@ -54,7 +54,7 @@ export const articleComponents: PortableTextComponents = {
     ),
     em: ({ children }) => <em className="italic">{children}</em>,
     code: ({ children }) => (
-      <code className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[0.95em] font-mono">
+      <code className="px-1.5 py-0.5 rounded bg-black/5 text-[0.95em] font-mono">
         {children}
       </code>
     ),

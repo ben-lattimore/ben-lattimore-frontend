@@ -7,13 +7,6 @@
   --foreground: theme('colors.brand-off-black');
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: theme('colors.brand-off-black');
-    --foreground: theme('colors.brand-pale-grey');
-  }
-}
-
 body {
   color: var(--foreground);
   background: var(--background);
