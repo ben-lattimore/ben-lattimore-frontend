@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArticleListItem } from '@/types';
 import { formatArticleDate } from '@/lib/formatDate';
 import { formatTitle } from '@/lib/formatTitle';
+import { readingLabel } from '@/lib/readingTime';
 
 export default function ArticleCard({ article }: { article: ArticleListItem }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -33,9 +34,13 @@ export default function ArticleCard({ article }: { article: ArticleListItem }) {
               </span>
             )}
           </h3>
-          <time dateTime={article.publishedAt} className="text-base block opacity-70 mt-1">
-            {formatArticleDate(article.publishedAt)}
-          </time>
+          <div className="text-base flex flex-wrap items-center gap-x-2 opacity-70 mt-1">
+            <time dateTime={article.publishedAt}>
+              {formatArticleDate(article.publishedAt)}
+            </time>
+            <span aria-hidden="true">·</span>
+            <span>{readingLabel(article.charCount)}</span>
+          </div>
         </div>
       </Link>
     </div>

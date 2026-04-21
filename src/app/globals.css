@@ -33,3 +33,17 @@ body {
     text-wrap: balance;
   }
 }
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+  article {
+    padding: 0 !important;
+  }
+}

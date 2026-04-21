@@ -27,7 +27,8 @@ async function getData() {
     title,
     subtitle,
     "slug": slug,
-    publishedAt
+    publishedAt,
+    "charCount": length(pt::text(body))
   }`;
 
   const [home, projects, articles] = await Promise.all([

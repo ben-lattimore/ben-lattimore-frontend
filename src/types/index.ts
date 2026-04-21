@@ -30,8 +30,10 @@ export interface ArticleListItem {
   subtitle?: string;
   slug: { current: string };
   publishedAt: string;
+  charCount?: number;
 }
 
 export interface ArticleData extends ArticleListItem {
   body: PortableTextBlock[];
+  showDownloads?: boolean;
 }
