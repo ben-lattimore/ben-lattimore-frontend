@@ -23,3 +23,15 @@ export interface ProjectData {
   reverseTextColor?: boolean;
   category: 'AI' | 'Web Development';
 }
+
+export interface ArticleListItem {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  slug: { current: string };
+  publishedAt: string;
+}
+
+export interface ArticleData extends ArticleListItem {
+  body: PortableTextBlock[];
+}
