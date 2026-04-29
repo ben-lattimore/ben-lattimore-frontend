@@ -16,12 +16,28 @@ export interface HomeData {
 export interface ProjectData {
   _id: string;
   clientName: string;
-  description: string;
-  technologyUsed: string[];
+  subtitle?: string;
+  technologyUsed: string[] | string;
   url?: string;
   backgroundColor: string;
   reverseTextColor?: boolean;
   category: 'AI' | 'Web Development';
+  slug?: string;
+  hasBody: boolean;
+}
+
+export interface ProjectDetailData {
+  _id: string;
+  clientName: string;
+  subtitle?: string;
+  technologyUsed: string[] | string;
+  url?: string;
+  backgroundColor: string;
+  reverseTextColor?: boolean;
+  category: 'AI' | 'Web Development';
+  slug: { current: string };
+  body?: PortableTextBlock[];
+  charCount?: number;
 }
 
 export interface ArticleListItem {

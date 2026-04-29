@@ -12,15 +12,16 @@ type MobileCategory = 'AI' | 'Web Development' | 'Writing';
 
 async function getData() {
   const homeQuery = `*[_type == "home"][0]`;
-  const projectsQuery = `*[_type == "project"] | order(category asc, order asc) {
+  const projectsQuery = `*[_type == "project"] | order(category asc, clientName asc) {
     _id,
     clientName,
-    description,
     technologyUsed,
     url,
     backgroundColor,
     reverseTextColor,
-    category
+    category,
+    "slug": slug.current,
+    "hasBody": defined(body) && length(body) > 0
   }`;
   const articlesQuery = `*[_type == "article" && defined(slug.current)] | order(publishedAt desc) {
     _id,

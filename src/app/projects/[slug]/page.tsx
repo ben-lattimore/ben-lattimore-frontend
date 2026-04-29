@@ -3,32 +3,32 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import { client } from '@/lib/sanity';
-import { ArticleData, HomeData } from '@/types';
+import { ProjectDetailData, HomeData } from '@/types';
 import { articleComponents } from '@/components/articlePortableText';
-import ArticleDownloads from '@/components/ArticleDownloads';
 import SiteHeader from '@/components/SiteHeader';
-import { formatArticleDate } from '@/lib/formatDate';
-import { formatTitle } from '@/lib/formatTitle';
 import { readingLabel } from '@/lib/readingTime';
 import { extractDescription } from '@/lib/extractDescription';
 
-const articleBySlugQuery = `*[_type == "article" && slug.current == $slug][0]{
+const projectBySlugQuery = `*[_type == "project" && slug.current == $slug][0]{
   _id,
-  title,
+  clientName,
   subtitle,
+  technologyUsed,
+  url,
+  backgroundColor,
+  reverseTextColor,
+  category,
   "slug": slug,
-  publishedAt,
-  showDownloads,
   body,
   "charCount": length(pt::text(body))
 }`;
 
-const allSlugsQuery = `*[_type == "article" && defined(slug.current)]{ "slug": slug.current }`;
+const allProjectSlugsQuery = `*[_type == "project" && defined(slug.current) && defined(body) && length(body) > 0]{ "slug": slug.current }`;
 
 const homeQuery = `*[_type == "home"][0]`;
 
-async function getArticle(slug: string): Promise<ArticleData | null> {
-  return client.fetch<ArticleData | null>(articleBySlugQuery, { slug });
+async function getProject(slug: string): Promise<ProjectDetailData | null> {
+  return client.fetch<ProjectDetailData | null>(projectBySlugQuery, { slug });
 }
 
 async function getHome(): Promise<HomeData> {
@@ -36,7 +36,7 @@ async function getHome(): Promise<HomeData> {
 }
 
 export async function generateStaticParams() {
-  const slugs = await client.fetch<Array<{ slug: string }>>(allSlugsQuery);
+  const slugs = await client.fetch<Array<{ slug: string }>>(allProjectSlugsQuery);
   return slugs.map(({ slug }) => ({ slug }));
 }
 
@@ -46,14 +46,12 @@ export async function generateMetadata(
   }
 ): Promise<Metadata> {
   const params = await props.params;
-  const article = await getArticle(params.slug);
-  if (!article) return { title: 'Not found' };
-  const description = extractDescription(article.body);
-  const displayTitle = formatTitle(article.title);
-  const displaySubtitle = article.subtitle ? formatTitle(article.subtitle) : '';
-  const fullTitle = displaySubtitle
-    ? `${displayTitle}: ${displaySubtitle}`
-    : displayTitle;
+  const project = await getProject(params.slug);
+  if (!project) return { title: 'Not found' };
+  const description = extractDescription(project.body);
+  const fullTitle = project.subtitle
+    ? `${project.clientName}: ${project.subtitle}`
+    : project.clientName;
   return {
     title: `${fullTitle} — Ben Lattimore`,
     description: description || undefined,
@@ -61,22 +59,25 @@ export async function generateMetadata(
       title: fullTitle,
       description: description || undefined,
       type: 'article',
-      publishedTime: article.publishedAt,
     },
   };
 }
 
-export default async function ArticlePage(
+export default async function ProjectPage(
   props: {
     params: Promise<{ slug: string }>;
   }
 ) {
   const params = await props.params;
-  const [article, home] = await Promise.all([
-    getArticle(params.slug),
+  const [project, home] = await Promise.all([
+    getProject(params.slug),
     getHome(),
   ]);
-  if (!article) notFound();
+  if (!project || !project.body || project.body.length === 0) notFound();
+
+  const techDisplay = Array.isArray(project.technologyUsed)
+    ? project.technologyUsed.join(', ')
+    : project.technologyUsed;
 
   return (
     <main className="min-h-screen flex justify-center">
@@ -96,39 +97,41 @@ export default async function ArticlePage(
 
           <article className="pt-4 pb-24 sm:pt-6 sm:pb-32">
             <header className="mb-12 sm:mb-16">
+              <p className="text-sm uppercase tracking-wider opacity-70 mb-3">
+                {project.category}
+              </p>
               <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-balance">
-                <span className="block leading-[1.1]">
-                  {formatTitle(article.title)}
-                </span>
-                {article.subtitle && (
+                <span className="block leading-[1.1]">{project.clientName}</span>
+                {project.subtitle && (
                   <span className="block text-2xl sm:text-3xl font-medium leading-tight opacity-80 mt-3">
-                    {formatTitle(article.subtitle)}
+                    {project.subtitle}
                   </span>
                 )}
               </h1>
               <div className="text-base opacity-70 flex flex-wrap items-center gap-x-2">
-                <time dateTime={article.publishedAt}>
-                  {formatArticleDate(article.publishedAt)}
-                </time>
-                <span aria-hidden="true">·</span>
-                <span>{readingLabel(article.charCount)}</span>
+                {techDisplay && <span>{techDisplay}</span>}
+                {techDisplay && project.charCount ? (
+                  <span aria-hidden="true">·</span>
+                ) : null}
+                {project.charCount ? (
+                  <span>{readingLabel(project.charCount)}</span>
+                ) : null}
               </div>
+              {project.url && (
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center mt-6 underline underline-offset-4 decoration-1 hover:decoration-2"
+                >
+                  Visit live site →
+                </a>
+              )}
             </header>
 
             <div>
-              <PortableText value={article.body} components={articleComponents} />
+              <PortableText value={project.body} components={articleComponents} />
             </div>
-
-            {article.showDownloads && (
-              <ArticleDownloads
-                slug={article.slug.current}
-                title={formatTitle(
-                  article.subtitle
-                    ? `${article.title}: ${article.subtitle}`
-                    : article.title
-                )}
-              />
-            )}
           </article>
         </div>
       </div>
