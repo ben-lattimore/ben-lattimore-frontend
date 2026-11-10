@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+
+// The origin never changes, so there's nothing to subscribe to. On the server
+// (and during hydration) it's '', which leaves the share URL relative.
+const subscribeNoop = () => () => {};
+const getOrigin = () => window.location.origin;
+const getServerOrigin = () => '';
 
 export default function ArticleDownloads({
   slug,
@@ -9,12 +15,9 @@ export default function ArticleDownloads({
   slug: string;
   title: string;
 }) {
-  const [canonicalUrl, setCanonicalUrl] = useState(`/writing/${slug}`);
+  const origin = useSyncExternalStore(subscribeNoop, getOrigin, getServerOrigin);
+  const canonicalUrl = `${origin}/writing/${slug}`;
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    setCanonicalUrl(`${window.location.origin}/writing/${slug}`);
-  }, [slug]);
 
   const copyLink = async () => {
     try {

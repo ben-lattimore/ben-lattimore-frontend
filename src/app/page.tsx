@@ -1,154 +1,95 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { client } from "@/lib/sanity";
-import { HomeData, ProjectData, ArticleListItem } from "@/types";
+import { useEffect, useState } from 'react';
 import ProjectCard from '@/components/ProjectCard';
 import ArticleCard from '@/components/ArticleCard';
 import SiteHeader from '@/components/SiteHeader';
-import { getTextColorClass } from '@/utils/colorUtils';
+import { getArticles, getHome, getProjects } from '@/lib/queries';
+import type { ArticleListItem, HomeData, ProjectData } from '@/types';
 
-type MobileCategory = 'AI' | 'Web Development' | 'Writing';
+type Column = 'AI' | 'Web Development' | 'Writing';
 
-async function getData() {
-  const homeQuery = `*[_type == "home"][0]`;
-  const projectsQuery = `*[_type == "project"] | order(category asc, clientName asc) {
-    _id,
-    clientName,
-    technologyUsed,
-    url,
-    backgroundColor,
-    reverseTextColor,
-    category,
-    "slug": slug.current,
-    "hasBody": defined(body) && length(body) > 0
-  }`;
-  const articlesQuery = `*[_type == "article" && defined(slug.current)] | order(publishedAt desc) {
-    _id,
-    title,
-    subtitle,
-    "slug": slug,
-    publishedAt,
-    "charCount": length(pt::text(body))
-  }`;
+const COLUMNS: { key: Column; title: string }[] = [
+  { key: 'AI', title: 'AI Projects' },
+  { key: 'Web Development', title: 'Web Development' },
+  { key: 'Writing', title: 'Writing' },
+];
 
-  const [home, projects, articles] = await Promise.all([
-    client.fetch<HomeData>(homeQuery),
-    client.fetch<ProjectData[]>(projectsQuery),
-    client.fetch<ArticleListItem[]>(articlesQuery),
-  ]);
-
-  return { home, projects, articles };
-}
+type HomePageData = {
+  home: HomeData;
+  projects: ProjectData[];
+  articles: ArticleListItem[];
+};
 
 export default function Home() {
-  const [data, setData] = useState<{ home: HomeData; projects: ProjectData[]; articles: ArticleListItem[] } | null>(null);
-  const [backgroundColor, setBackgroundColor] = useState<string | null>(null);
-  const [reverseTextColor, setReverseTextColor] = useState<boolean>(false);
-  const [activeMobileCategory, setActiveMobileCategory] = useState<MobileCategory>('AI');
+  const [data, setData] = useState<HomePageData | null>(null);
+  // Hovering a project tints the whole page with that project's colours.
+  const [hoveredProject, setHoveredProject] = useState<ProjectData | null>(null);
+  const [activeMobileColumn, setActiveMobileColumn] = useState<Column>('AI');
 
   useEffect(() => {
-    getData().then(setData);
+    Promise.all([getHome(), getProjects(), getArticles()]).then(
+      ([home, projects, articles]) => setData({ home, projects, articles }),
+    );
   }, []);
 
   if (!data) return <div>Loading...</div>;
 
   const { home, projects, articles } = data;
 
-  // Filter projects by category
-  const aiProjects = projects.filter(project => project.category === 'AI');
-  const webProjects = projects.filter(project => project.category === 'Web Development');
+  const renderColumn = (column: Column) =>
+    column === 'Writing'
+      ? articles.map((article) => <ArticleCard key={article._id} article={article} />)
+      : projects
+          .filter((project) => project.category === column)
+          .map((project) => (
+            <ProjectCard key={project._id} project={project} onHover={setHoveredProject} />
+          ));
+
+  const textColorClass = hoveredProject?.reverseTextColor
+    ? 'text-brand-pale-grey'
+    : 'text-brand-off-black';
 
   return (
-    <main className="min-h-screen flex justify-center transition-all duration-300" style={{ backgroundColor: backgroundColor || 'initial' }}>
-      <div className={`w-full xl:w-[1600px] mx-auto transition-all duration-300 ${getTextColorClass(reverseTextColor)}`}>
+    <main
+      className="min-h-screen flex justify-center transition-all duration-300"
+      style={{ backgroundColor: hoveredProject?.backgroundColor || 'initial' }}
+    >
+      <div className={`w-full xl:w-[1600px] mx-auto transition-all duration-300 ${textColorClass}`}>
         <SiteHeader home={home} />
 
         <div className="p-8 pb-20 sm:p-20">
-          {/* Mobile Tab Interface */}
+          {/* Mobile: tabs */}
           <div className="block md:hidden mb-8">
             <div className="flex border-b border-gray-300" role="tablist" aria-label="Work categories">
-              {(['AI', 'Web Development', 'Writing'] as const).map((cat) => (
+              {COLUMNS.map(({ key, title }) => (
                 <button
-                  key={cat}
+                  key={key}
                   role="tab"
-                  aria-selected={activeMobileCategory === cat}
-                  onClick={() => setActiveMobileCategory(cat)}
+                  aria-selected={activeMobileColumn === key}
+                  onClick={() => setActiveMobileColumn(key)}
                   className={`px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                    activeMobileCategory === cat
+                    activeMobileColumn === key
                       ? 'border-b-2 border-current'
                       : 'opacity-60 hover:opacity-100'
                   }`}
                 >
-                  {cat === 'AI' ? 'AI Projects' : cat}
+                  {title}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Mobile Display */}
-          <section className="block md:hidden">
-            {activeMobileCategory === 'Writing'
-              ? articles.map((article) => (
-                  <ArticleCard key={article._id} article={article} />
-                ))
-              : (activeMobileCategory === 'AI' ? aiProjects : webProjects).map((project) => (
-                  <ProjectCard
-                    key={project._id}
-                    project={project}
-                    onHover={(bgColor, reverse) => {
-                      setBackgroundColor(bgColor);
-                      setReverseTextColor(reverse);
-                    }}
-                  />
-                ))}
-          </section>
+          <section className="block md:hidden">{renderColumn(activeMobileColumn)}</section>
 
-          {/* Desktop Three-Column Layout */}
+          {/* Desktop: three columns */}
           <div className="hidden md:flex md:gap-x-12">
-            {/* AI Projects Column */}
-            <div className="w-1/3">
-              <h2 className="text-2xl font-semibold mb-8">AI Projects</h2>
-              <section>
-                {aiProjects.map((project) => (
-                  <ProjectCard
-                    key={project._id}
-                    project={project}
-                    onHover={(bgColor, reverse) => {
-                      setBackgroundColor(bgColor);
-                      setReverseTextColor(reverse);
-                    }}
-                  />
-                ))}
-              </section>
-            </div>
-
-            {/* Web Development Projects Column */}
-            <div className="w-1/3">
-              <h2 className="text-2xl font-semibold mb-8">Web Development</h2>
-              <section>
-                {webProjects.map((project) => (
-                  <ProjectCard
-                    key={project._id}
-                    project={project}
-                    onHover={(bgColor, reverse) => {
-                      setBackgroundColor(bgColor);
-                      setReverseTextColor(reverse);
-                    }}
-                  />
-                ))}
-              </section>
-            </div>
-
-            {/* Writing Column */}
-            <div className="w-1/3">
-              <h2 className="text-2xl font-semibold mb-8">Writing</h2>
-              <section>
-                {articles.map((article) => (
-                  <ArticleCard key={article._id} article={article} />
-                ))}
-              </section>
-            </div>
+            {COLUMNS.map(({ key, title }) => (
+              <div key={key} className="w-1/3">
+                <h2 className="text-2xl font-semibold mb-8">{title}</h2>
+                <section>{renderColumn(key)}</section>
+              </div>
+            ))}
           </div>
         </div>
       </div>

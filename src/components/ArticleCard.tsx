@@ -1,31 +1,18 @@
-'use client'
-
-import { useState } from 'react';
 import Link from 'next/link';
-import { ArticleListItem } from '@/types';
+import type { ArticleListItem } from '@/types';
 import { formatArticleDate } from '@/lib/formatDate';
 import { formatTitle } from '@/lib/formatTitle';
 import { readingLabel } from '@/lib/readingTime';
 
+// Same slide-on-hover as ProjectCard, but articles deliberately don't tint the page.
 export default function ArticleCard({ article }: { article: ArticleListItem }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <div
-      className="pb-16 relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="group pb-16 relative">
       <Link
-        href={`/writing/${article.slug.current}`}
+        href={`/writing/${article.slug}`}
         className="inline-block w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-4 rounded-sm"
       >
-        <div
-          style={{
-            transform: isHovered ? 'translateX(40px)' : 'translateX(0)',
-            transition: 'transform 0.3s ease-in-out',
-          }}
-        >
+        <div className="transition-transform duration-300 ease-[ease-in-out] group-hover:translate-x-10">
           <h3 className="text-xl font-semibold mr-16">
             <span className="block">{formatTitle(article.title)}</span>
             {article.subtitle && (

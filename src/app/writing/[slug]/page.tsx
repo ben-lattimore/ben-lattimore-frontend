@@ -1,137 +1,78 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
-import { client } from '@/lib/sanity';
-import { ArticleData, HomeData } from '@/types';
-import { articleComponents } from '@/components/articlePortableText';
+import { portableTextComponents } from '@/components/portableTextComponents';
 import ArticleDownloads from '@/components/ArticleDownloads';
-import SiteHeader from '@/components/SiteHeader';
+import ReadingLayout from '@/components/ReadingLayout';
+import { getArticle, getArticleSlugs, getHome } from '@/lib/queries';
 import { formatArticleDate } from '@/lib/formatDate';
 import { formatTitle } from '@/lib/formatTitle';
 import { readingLabel } from '@/lib/readingTime';
 import { extractDescription } from '@/lib/extractDescription';
 
-const articleBySlugQuery = `*[_type == "article" && slug.current == $slug][0]{
-  _id,
-  title,
-  subtitle,
-  "slug": slug,
-  publishedAt,
-  showDownloads,
-  body,
-  "charCount": length(pt::text(body))
-}`;
-
-const allSlugsQuery = `*[_type == "article" && defined(slug.current)]{ "slug": slug.current }`;
-
-const homeQuery = `*[_type == "home"][0]`;
-
-async function getArticle(slug: string): Promise<ArticleData | null> {
-  return client.fetch<ArticleData | null>(articleBySlugQuery, { slug });
-}
-
-async function getHome(): Promise<HomeData> {
-  return client.fetch<HomeData>(homeQuery);
-}
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  const slugs = await client.fetch<Array<{ slug: string }>>(allSlugsQuery);
-  return slugs.map(({ slug }) => ({ slug }));
+  const slugs = await getArticleSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata(
-  props: {
-    params: Promise<{ slug: string }>;
-  }
-): Promise<Metadata> {
-  const params = await props.params;
-  const article = await getArticle(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticle(slug);
   if (!article) return { title: 'Not found' };
-  const description = extractDescription(article.body);
+  const description = extractDescription(article.body) || undefined;
   const displayTitle = formatTitle(article.title);
-  const displaySubtitle = article.subtitle ? formatTitle(article.subtitle) : '';
-  const fullTitle = displaySubtitle
-    ? `${displayTitle}: ${displaySubtitle}`
+  const fullTitle = article.subtitle
+    ? `${displayTitle}: ${formatTitle(article.subtitle)}`
     : displayTitle;
   return {
     title: `${fullTitle} — Ben Lattimore`,
-    description: description || undefined,
+    description,
     openGraph: {
       title: fullTitle,
-      description: description || undefined,
+      description,
       type: 'article',
       publishedTime: article.publishedAt,
     },
   };
 }
 
-export default async function ArticlePage(
-  props: {
-    params: Promise<{ slug: string }>;
-  }
-) {
-  const params = await props.params;
-  const [article, home] = await Promise.all([
-    getArticle(params.slug),
-    getHome(),
-  ]);
+export default async function ArticlePage({ params }: Props) {
+  const { slug } = await params;
+  const [article, home] = await Promise.all([getArticle(slug), getHome()]);
   if (!article) notFound();
 
   return (
-    <main className="min-h-screen flex justify-center">
-      <div className="w-full xl:w-[1600px]">
-        <div className="print:hidden">
-          <SiteHeader home={home} variant="article" />
+    <ReadingLayout home={home}>
+      <header className="mb-12 sm:mb-16">
+        <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-balance">
+          <span className="block leading-[1.1]">{formatTitle(article.title)}</span>
+          {article.subtitle && (
+            <span className="block text-2xl sm:text-3xl font-medium leading-tight opacity-80 mt-3">
+              {formatTitle(article.subtitle)}
+            </span>
+          )}
+        </h1>
+        <div className="text-base opacity-70 flex flex-wrap items-center gap-x-2">
+          <time dateTime={article.publishedAt}>{formatArticleDate(article.publishedAt)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{readingLabel(article.charCount)}</span>
         </div>
+      </header>
 
-        <div className="max-w-[68ch] mx-auto px-6 sm:px-8">
-          <Link
-            href="/"
-            aria-label="Back to home"
-            className="inline-flex items-center text-base opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-4 rounded-sm print:hidden"
-          >
-            <span aria-hidden="true" className="mr-2">←</span>back
-          </Link>
-
-          <article className="pt-4 pb-24 sm:pt-6 sm:pb-32">
-            <header className="mb-12 sm:mb-16">
-              <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-balance">
-                <span className="block leading-[1.1]">
-                  {formatTitle(article.title)}
-                </span>
-                {article.subtitle && (
-                  <span className="block text-2xl sm:text-3xl font-medium leading-tight opacity-80 mt-3">
-                    {formatTitle(article.subtitle)}
-                  </span>
-                )}
-              </h1>
-              <div className="text-base opacity-70 flex flex-wrap items-center gap-x-2">
-                <time dateTime={article.publishedAt}>
-                  {formatArticleDate(article.publishedAt)}
-                </time>
-                <span aria-hidden="true">·</span>
-                <span>{readingLabel(article.charCount)}</span>
-              </div>
-            </header>
-
-            <div>
-              <PortableText value={article.body} components={articleComponents} />
-            </div>
-
-            {article.showDownloads && (
-              <ArticleDownloads
-                slug={article.slug.current}
-                title={formatTitle(
-                  article.subtitle
-                    ? `${article.title}: ${article.subtitle}`
-                    : article.title
-                )}
-              />
-            )}
-          </article>
-        </div>
+      <div>
+        <PortableText value={article.body} components={portableTextComponents} />
       </div>
-    </main>
+
+      {article.showDownloads && (
+        <ArticleDownloads
+          slug={article.slug}
+          title={formatTitle(
+            article.subtitle ? `${article.title}: ${article.subtitle}` : article.title,
+          )}
+        />
+      )}
+    </ReadingLayout>
   );
 }

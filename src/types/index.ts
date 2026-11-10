@@ -1,8 +1,9 @@
-import { PortableTextBlock } from '@portabletext/types'
+import type { PortableTextBlock } from '@portabletext/types';
+
+// Shapes returned by the queries in src/lib/queries.ts.
 
 export interface HomeData {
-  name: string;
-  main_text: PortableTextBlock[]; // Use PortableTextBlock instead of any
+  main_text: PortableTextBlock[];
   linkedin: {
     text: string;
     url: string;
@@ -13,29 +14,26 @@ export interface HomeData {
   };
 }
 
-export interface ProjectData {
+export type ProjectCategory = 'AI' | 'Web Development';
+
+interface ProjectBase {
   _id: string;
   clientName: string;
-  subtitle?: string;
-  technologyUsed: string[] | string;
+  technologyUsed?: string;
   url?: string;
-  backgroundColor: string;
+  backgroundColor?: string;
   reverseTextColor?: boolean;
-  category: 'AI' | 'Web Development';
+  category: ProjectCategory;
+}
+
+export interface ProjectData extends ProjectBase {
   slug?: string;
   hasBody: boolean;
 }
 
-export interface ProjectDetailData {
-  _id: string;
-  clientName: string;
+export interface ProjectDetailData extends ProjectBase {
+  slug: string;
   subtitle?: string;
-  technologyUsed: string[] | string;
-  url?: string;
-  backgroundColor: string;
-  reverseTextColor?: boolean;
-  category: 'AI' | 'Web Development';
-  slug: { current: string };
   body?: PortableTextBlock[];
   charCount?: number;
 }
@@ -44,7 +42,7 @@ export interface ArticleListItem {
   _id: string;
   title: string;
   subtitle?: string;
-  slug: { current: string };
+  slug: string;
   publishedAt: string;
   charCount?: number;
 }

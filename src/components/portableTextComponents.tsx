@@ -14,7 +14,7 @@ function blockIsEmpty(value: PortableTextBlock | undefined): boolean {
   return children.every((c) => !(c.text ?? '').trim());
 }
 
-export const articleComponents: PortableTextComponents = {
+export const portableTextComponents: PortableTextComponents = {
   block: {
     normal: ({ value, children }) => {
       if (blockIsEmpty(value)) return null;

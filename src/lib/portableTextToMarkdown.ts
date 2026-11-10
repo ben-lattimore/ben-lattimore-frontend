@@ -21,10 +21,6 @@ type SanityImageBlock = PortableTextBlock & {
   caption?: string;
 };
 
-type DividerBlock = PortableTextBlock & {
-  _type: 'divider';
-};
-
 type TextBlock = PortableTextBlock & {
   _type: 'block';
   style?: string;
