@@ -16,7 +16,8 @@ There are no environment variables. The Sanity project (`9cci858w` / `production
 
 ## Layout
 
-- `src/app/page.tsx`: home page (AI / Web Development / Writing columns)
+- `src/app/page.tsx`: home page, server-rendered; interactivity lives in `src/components/HomeView.tsx`
+- `src/app/{robots,sitemap}.ts`, `feed.xml`, `llms.txt`, `opengraph-image.tsx`: SEO/GEO routes; site identity and canonical URL live in `src/lib/site.ts`
 - `src/app/writing/[slug]`, `src/app/projects/[slug]`: long-form pages, pre-rendered from Sanity
 - `src/app/api/writing/[slug]/markdown`: Markdown download for articles with downloads enabled
 - `src/lib/queries.ts`: every GROQ query; keep it in sync with the Sanity schemas and `src/types`

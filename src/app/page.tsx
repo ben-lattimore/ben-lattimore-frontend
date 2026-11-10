@@ -1,98 +1,39 @@
-'use client'
-
-import { useEffect, useState } from 'react';
-import ProjectCard from '@/components/ProjectCard';
-import ArticleCard from '@/components/ArticleCard';
-import SiteHeader from '@/components/SiteHeader';
+import type { Metadata } from 'next';
+import HomeView from '@/components/HomeView';
+import JsonLd from '@/components/JsonLd';
 import { getArticles, getHome, getProjects } from '@/lib/queries';
-import type { ArticleListItem, HomeData, ProjectData } from '@/types';
+import { extractDescription } from '@/lib/extractDescription';
+import { homeJsonLd } from '@/lib/structuredData';
+import { AUTHOR_NAME, SITE_NAME, alternatesFor, openGraphDefaults } from '@/lib/site';
 
-type Column = 'AI' | 'Web Development' | 'Writing';
+// Server-rendered so crawlers (including AI crawlers that don't run JavaScript)
+// get the full page. Regenerated at most every 60s so Sanity edits still appear
+// without a redeploy.
+export const revalidate = 60;
 
-const COLUMNS: { key: Column; title: string }[] = [
-  { key: 'AI', title: 'AI Projects' },
-  { key: 'Web Development', title: 'Web Development' },
-  { key: 'Writing', title: 'Writing' },
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const home = await getHome();
+  const description = extractDescription(home.main_text) || undefined;
+  return {
+    description,
+    alternates: alternatesFor('/'),
+    openGraph: {
+      ...openGraphDefaults,
+      type: 'website',
+      url: '/',
+      title: `${SITE_NAME} — ${AUTHOR_NAME}`,
+      description,
+    },
+  };
+}
 
-type HomePageData = {
-  home: HomeData;
-  projects: ProjectData[];
-  articles: ArticleListItem[];
-};
-
-export default function Home() {
-  const [data, setData] = useState<HomePageData | null>(null);
-  // Hovering a project tints the whole page with that project's colours.
-  const [hoveredProject, setHoveredProject] = useState<ProjectData | null>(null);
-  const [activeMobileColumn, setActiveMobileColumn] = useState<Column>('AI');
-
-  useEffect(() => {
-    Promise.all([getHome(), getProjects(), getArticles()]).then(
-      ([home, projects, articles]) => setData({ home, projects, articles }),
-    );
-  }, []);
-
-  if (!data) return <div>Loading...</div>;
-
-  const { home, projects, articles } = data;
-
-  const renderColumn = (column: Column) =>
-    column === 'Writing'
-      ? articles.map((article) => <ArticleCard key={article._id} article={article} />)
-      : projects
-          .filter((project) => project.category === column)
-          .map((project) => (
-            <ProjectCard key={project._id} project={project} onHover={setHoveredProject} />
-          ));
-
-  const textColorClass = hoveredProject?.reverseTextColor
-    ? 'text-brand-pale-grey'
-    : 'text-brand-off-black';
+export default async function Home() {
+  const [home, projects, articles] = await Promise.all([getHome(), getProjects(), getArticles()]);
 
   return (
-    <main
-      className="min-h-screen flex justify-center transition-all duration-300"
-      style={{ backgroundColor: hoveredProject?.backgroundColor || 'initial' }}
-    >
-      <div className={`w-full xl:w-[1600px] mx-auto transition-all duration-300 ${textColorClass}`}>
-        <SiteHeader home={home} />
-
-        <div className="p-8 pb-20 sm:p-20">
-          {/* Mobile: tabs */}
-          <div className="block md:hidden mb-8">
-            <div className="flex border-b border-gray-300" role="tablist" aria-label="Work categories">
-              {COLUMNS.map(({ key, title }) => (
-                <button
-                  key={key}
-                  role="tab"
-                  aria-selected={activeMobileColumn === key}
-                  onClick={() => setActiveMobileColumn(key)}
-                  className={`px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                    activeMobileColumn === key
-                      ? 'border-b-2 border-current'
-                      : 'opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  {title}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <section className="block md:hidden">{renderColumn(activeMobileColumn)}</section>
-
-          {/* Desktop: three columns */}
-          <div className="hidden md:flex md:gap-x-12">
-            {COLUMNS.map(({ key, title }) => (
-              <div key={key} className="w-1/3">
-                <h2 className="text-2xl font-semibold mb-8">{title}</h2>
-                <section>{renderColumn(key)}</section>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </main>
+    <>
+      <JsonLd data={homeJsonLd(home)} />
+      <HomeView home={home} projects={projects} articles={articles} />
+    </>
   );
 }

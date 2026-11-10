@@ -3,6 +3,7 @@ import type { PortableTextBlock } from '@portabletext/types';
 // Shapes returned by the queries in src/lib/queries.ts.
 
 export interface HomeData {
+  _updatedAt: string;
   main_text: PortableTextBlock[];
   linkedin: {
     text: string;
@@ -12,12 +13,17 @@ export interface HomeData {
     text: string;
     address: string;
   };
+  // "Search & AI profile" fieldset: structured data and llms.txt only.
+  jobTitle?: string;
+  knowsAbout?: string[];
+  sameAs?: string[];
 }
 
 export type ProjectCategory = 'AI' | 'Web Development';
 
 interface ProjectBase {
   _id: string;
+  _updatedAt: string;
   clientName: string;
   technologyUsed?: string;
   url?: string;
@@ -40,6 +46,7 @@ export interface ProjectDetailData extends ProjectBase {
 
 export interface ArticleListItem {
   _id: string;
+  _updatedAt: string;
   title: string;
   subtitle?: string;
   slug: string;

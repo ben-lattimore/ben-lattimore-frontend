@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
+import { AUTHOR_NAME, SITE_NAME, SITE_URL, alternatesFor, openGraphDefaults } from '@/lib/site';
 import "./globals.css";
 
 const inter = Inter({
@@ -8,8 +9,16 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Things Ben Built",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${AUTHOR_NAME}`,
+    template: `%s — ${AUTHOR_NAME}`,
+  },
   description: "A portfolio of internet things Ben built for fun and profit.",
+  authors: [{ name: AUTHOR_NAME, url: SITE_URL }],
+  alternates: alternatesFor('/'),
+  openGraph: { ...openGraphDefaults, type: 'website' },
+  twitter: { card: 'summary_large_image' },
   icons: {
     icon: [
       { url: '/favicon.ico', type: 'image/x-icon' },
@@ -30,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en-GB">
       <body className={`${inter.className} antialiased`}>
         {children}
       </body>

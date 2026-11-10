@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getArticle } from '@/lib/queries';
 import { buildMarkdownDocument } from '@/lib/portableTextToMarkdown';
+import { absoluteUrl, articlePath } from '@/lib/site';
 
-export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getArticle(slug);
 
@@ -19,7 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     subtitle: article.subtitle,
     publishedAt: article.publishedAt,
     body: article.body,
-    canonicalUrl: `${new URL(request.url).origin}/writing/${slug}`,
+    canonicalUrl: absoluteUrl(articlePath(slug)),
   });
 
   return new Response(markdown, {

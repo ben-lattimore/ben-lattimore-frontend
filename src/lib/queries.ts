@@ -17,6 +17,7 @@ const homeQuery = `*[_type == "home"][0]`;
 
 const projectListQuery = `*[_type == "project"] | order(category asc, clientName asc) {
   _id,
+  _updatedAt,
   clientName,
   technologyUsed,
   url,
@@ -29,6 +30,7 @@ const projectListQuery = `*[_type == "project"] | order(category asc, clientName
 
 const projectBySlugQuery = `*[_type == "project" && slug.current == $slug][0]{
   _id,
+  _updatedAt,
   clientName,
   subtitle,
   technologyUsed,
@@ -44,24 +46,27 @@ const projectBySlugQuery = `*[_type == "project" && slug.current == $slug][0]{
 // Only projects with a body get a detail page.
 const projectSlugsQuery = `*[_type == "project" && defined(slug.current) && defined(body) && length(body) > 0].slug.current`;
 
-const articleListQuery = `*[_type == "article" && defined(slug.current)] | order(publishedAt desc) {
+const articleFields = `
   _id,
+  _updatedAt,
   title,
   subtitle,
   "slug": slug.current,
   publishedAt,
-  ${charCount}
+  ${charCount}`;
+
+const articleListQuery = `*[_type == "article" && defined(slug.current)] | order(publishedAt desc) {${articleFields}
 }`;
 
-const articleBySlugQuery = `*[_type == "article" && slug.current == $slug][0]{
-  _id,
-  title,
-  subtitle,
-  "slug": slug.current,
-  publishedAt,
+// Full articles, newest first: for the RSS feed and llms.txt.
+const articlesWithBodyQuery = `*[_type == "article" && defined(slug.current)] | order(publishedAt desc) {${articleFields},
   showDownloads,
-  body,
-  ${charCount}
+  body
+}`;
+
+const articleBySlugQuery = `*[_type == "article" && slug.current == $slug][0]{${articleFields},
+  showDownloads,
+  body
 }`;
 
 const articleSlugsQuery = `*[_type == "article" && defined(slug.current)].slug.current`;
@@ -74,6 +79,7 @@ export const getProject = (slug: string) =>
 export const getProjectSlugs = () => client.fetch<string[]>(projectSlugsQuery);
 
 export const getArticles = () => client.fetch<ArticleListItem[]>(articleListQuery);
+export const getArticlesWithBody = () => client.fetch<ArticleData[]>(articlesWithBodyQuery);
 export const getArticle = (slug: string) =>
   client.fetch<ArticleData | null>(articleBySlugQuery, { slug });
 export const getArticleSlugs = () => client.fetch<string[]>(articleSlugsQuery);

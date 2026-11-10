@@ -3,13 +3,14 @@ import type { ArticleListItem } from '@/types';
 import { formatArticleDate } from '@/lib/formatDate';
 import { formatTitle } from '@/lib/formatTitle';
 import { readingLabel } from '@/lib/readingTime';
+import { articlePath } from '@/lib/site';
 
 // Same slide-on-hover as ProjectCard, but articles deliberately don't tint the page.
 export default function ArticleCard({ article }: { article: ArticleListItem }) {
   return (
     <div className="group pb-16 relative">
       <Link
-        href={`/writing/${article.slug}`}
+        href={articlePath(article.slug)}
         className="inline-block w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-4 rounded-sm"
       >
         <div className="transition-transform duration-300 ease-[ease-in-out] group-hover:translate-x-10">

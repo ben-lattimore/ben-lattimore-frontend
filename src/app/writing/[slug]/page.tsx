@@ -3,14 +3,26 @@ import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import ArticleDownloads from '@/components/ArticleDownloads';
+import JsonLd from '@/components/JsonLd';
 import ReadingLayout from '@/components/ReadingLayout';
 import { getArticle, getArticleSlugs, getHome } from '@/lib/queries';
 import { formatArticleDate } from '@/lib/formatDate';
-import { formatTitle } from '@/lib/formatTitle';
+import { formatArticleTitle, formatTitle } from '@/lib/formatTitle';
 import { readingLabel } from '@/lib/readingTime';
 import { extractDescription } from '@/lib/extractDescription';
+import { articleJsonLd } from '@/lib/structuredData';
+import {
+  AUTHOR_NAME,
+  alternatesFor,
+  articleMarkdownPath,
+  articlePath,
+  openGraphDefaults,
+} from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
+
+// Pre-rendered at build, then refreshed at most every 60s so Sanity edits appear.
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const slugs = await getArticleSlugs();
@@ -22,18 +34,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticle(slug);
   if (!article) return { title: 'Not found' };
   const description = extractDescription(article.body) || undefined;
-  const displayTitle = formatTitle(article.title);
-  const fullTitle = article.subtitle
-    ? `${displayTitle}: ${formatTitle(article.subtitle)}`
-    : displayTitle;
+  const fullTitle = formatArticleTitle(article);
+  const path = articlePath(slug);
   return {
-    title: `${fullTitle} — Ben Lattimore`,
+    title: fullTitle,
     description,
+    // A Markdown copy for readers and AI tools, when downloads are enabled.
+    alternates: alternatesFor(
+      path,
+      article.showDownloads ? { 'text/markdown': articleMarkdownPath(slug) } : {},
+    ),
     openGraph: {
+      ...openGraphDefaults,
+      type: 'article',
+      url: path,
       title: fullTitle,
       description,
-      type: 'article',
       publishedTime: article.publishedAt,
+      modifiedTime: article._updatedAt,
+      authors: [AUTHOR_NAME],
     },
   };
 }
@@ -45,6 +64,7 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <ReadingLayout home={home}>
+      <JsonLd data={articleJsonLd(article, extractDescription(article.body))} />
       <header className="mb-12 sm:mb-16">
         <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-balance">
           <span className="block leading-[1.1]">{formatTitle(article.title)}</span>
@@ -66,12 +86,7 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       {article.showDownloads && (
-        <ArticleDownloads
-          slug={article.slug}
-          title={formatTitle(
-            article.subtitle ? `${article.title}: ${article.subtitle}` : article.title,
-          )}
-        />
+        <ArticleDownloads slug={article.slug} title={formatArticleTitle(article)} />
       )}
     </ReadingLayout>
   );

@@ -1,12 +1,7 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
-
-// The origin never changes, so there's nothing to subscribe to. On the server
-// (and during hydration) it's '', which leaves the share URL relative.
-const subscribeNoop = () => () => {};
-const getOrigin = () => window.location.origin;
-const getServerOrigin = () => '';
+import { useState } from 'react';
+import { absoluteUrl, articleMarkdownPath, articlePath } from '@/lib/site';
 
 export default function ArticleDownloads({
   slug,
@@ -15,8 +10,8 @@ export default function ArticleDownloads({
   slug: string;
   title: string;
 }) {
-  const origin = useSyncExternalStore(subscribeNoop, getOrigin, getServerOrigin);
-  const canonicalUrl = `${origin}/writing/${slug}`;
+  // Always share the canonical production URL, even from previews or localhost.
+  const canonicalUrl = absoluteUrl(articlePath(slug));
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {
@@ -50,7 +45,7 @@ export default function ArticleDownloads({
       </h2>
       <div className="flex flex-wrap gap-x-6 gap-y-3">
         <a
-          href={`/api/writing/${slug}/markdown`}
+          href={articleMarkdownPath(slug)}
           className={linkClasses}
           download
         >
