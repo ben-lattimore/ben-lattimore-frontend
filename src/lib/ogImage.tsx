@@ -11,14 +11,13 @@ export const ogContentType = 'image/png';
 const BRAND_BACKGROUND = '#f5f5f5';
 const BRAND_TEXT = '#111111';
 
-// Literal paths (not a template) so build tracing bundles only these two files.
-const FONT_FILES = {
-  400: 'node_modules/@fontsource/inter/files/inter-latin-400-normal.woff',
-  500: 'node_modules/@fontsource/inter/files/inter-latin-500-normal.woff',
-} as const;
-
-const fontFile = (weight: keyof typeof FONT_FILES) =>
-  readFile(join(process.cwd(), FONT_FILES[weight]));
+// Each readFile gets a string-literal path, written out in full. Any lookup or
+// template makes build tracing copy the whole project into these functions.
+const loadFonts = () =>
+  Promise.all([
+    readFile(join(process.cwd(), 'node_modules/@fontsource/inter/files/inter-latin-400-normal.woff')),
+    readFile(join(process.cwd(), 'node_modules/@fontsource/inter/files/inter-latin-500-normal.woff')),
+  ]);
 
 export async function renderOgCard({
   eyebrow,
@@ -35,7 +34,7 @@ export async function renderOgCard({
   background?: string;
   reverseText?: boolean;
 }) {
-  const [regular, medium] = await Promise.all([fontFile(400), fontFile(500)]);
+  const [regular, medium] = await loadFonts();
   const color = reverseText ? BRAND_BACKGROUND : BRAND_TEXT;
 
   return new ImageResponse(
