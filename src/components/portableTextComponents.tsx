@@ -14,11 +14,13 @@ function blockIsEmpty(value: PortableTextBlock | undefined): boolean {
   return children.every((c) => !(c.text ?? '').trim());
 }
 
+// Body text, quotes and lists take their font size from the reading column in
+// ReadingLayout (18px, 20px from xl), so they set line height only.
 export const portableTextComponents: PortableTextComponents = {
   block: {
     normal: ({ value, children }) => {
       if (blockIsEmpty(value)) return null;
-      return <p className="text-lg leading-[1.75] mb-6">{children}</p>;
+      return <p className="leading-[1.75] mb-6">{children}</p>;
     },
     h2: ({ children }) => (
       <h2 className="text-2xl sm:text-3xl font-semibold mt-14 mb-4 leading-tight">
@@ -31,19 +33,19 @@ export const portableTextComponents: PortableTextComponents = {
       </h3>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-2 border-current pl-6 my-8 italic opacity-80 text-lg leading-[1.75]">
+      <blockquote className="border-l-2 border-current pl-6 my-8 italic opacity-80 leading-[1.75]">
         {children}
       </blockquote>
     ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="list-disc pl-6 mb-6 space-y-2 text-lg leading-[1.75]">
+      <ul className="list-disc pl-6 mb-6 space-y-2 leading-[1.75]">
         {children}
       </ul>
     ),
     number: ({ children }) => (
-      <ol className="list-decimal pl-6 mb-6 space-y-2 text-lg leading-[1.75]">
+      <ol className="list-decimal pl-6 mb-6 space-y-2 leading-[1.75]">
         {children}
       </ol>
     ),
@@ -85,7 +87,7 @@ export const portableTextComponents: PortableTextComponents = {
             alt={alt}
             width={1400}
             height={933}
-            sizes="(min-width: 768px) 68ch, 100vw"
+            sizes="(min-width: 1280px) 692px, (min-width: 768px) 623px, 100vw"
             className="w-full h-auto rounded-sm"
           />
           {caption && (
