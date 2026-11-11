@@ -60,22 +60,28 @@ export function articleJsonLd(article: ArticleData, description: string) {
   };
 }
 
+// A project write-up is a case-study article. The live product it describes,
+// when there is one, is what the article is `about`.
 export function projectJsonLd(project: ProjectDetailData, description: string) {
   const url = absoluteUrl(projectPath(project.slug));
   return {
     '@context': 'https://schema.org',
-    '@type': 'CreativeWork',
-    name: formatProjectTitle(project),
+    '@type': 'Article',
+    headline: formatProjectTitle(project),
     description: description || undefined,
     url,
     mainEntityOfPage: url,
     image: `${url}/opengraph-image`,
+    datePublished: project.publishedAt,
     dateModified: project._updatedAt,
-    genre: project.category,
+    articleSection: project.category,
     keywords: project.technologyUsed,
-    sameAs: project.url,
+    about: project.url
+      ? { '@type': 'CreativeWork', name: project.clientName, url: project.url }
+      : undefined,
     inLanguage: 'en-GB',
-    creator: authorRef,
+    author: authorRef,
+    publisher: authorRef,
     isPartOf: { '@id': WEBSITE_ID },
   };
 }

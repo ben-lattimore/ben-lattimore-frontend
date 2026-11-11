@@ -8,6 +8,13 @@ type TextBlock = PortableTextBlock & {
   children?: Array<{ text?: string }>;
 };
 
+// A paragraph with no closing punctuation (a standfirst such as "Taking the
+// paperwork out of care training assessments") gets a full stop when another
+// paragraph follows, so the two don't run together in a description.
+const ENDS_SENTENCE = /[.!?…:;]["'”’)]?$/;
+const joinParagraphs = (text: string, next: string) =>
+  `${ENDS_SENTENCE.test(text) ? text : `${text}.`} ${next}`;
+
 // Plain text of a body's ordinary paragraphs. Headings, quotes and list items
 // are skipped, so a write-up that opens with a "Problem" heading still yields
 // a real sentence. Stops once `minLength` characters have been collected.
@@ -21,7 +28,7 @@ export function paragraphText(
     if (block.style && block.style !== 'normal') continue;
     const blockText = (block.children ?? []).map((c) => c.text ?? '').join('').trim();
     if (!blockText) continue;
-    text = text ? `${text} ${blockText}` : blockText;
+    text = text ? joinParagraphs(text, blockText) : blockText;
     if (text.length >= minLength) break;
   }
   return text;

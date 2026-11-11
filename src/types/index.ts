@@ -40,6 +40,7 @@ export interface ProjectData extends ProjectBase {
 export interface ProjectDetailData extends ProjectBase {
   slug: string;
   subtitle?: string;
+  publishedAt?: string;
   body?: PortableTextBlock[];
   charCount?: number;
 }

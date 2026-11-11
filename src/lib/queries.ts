@@ -33,6 +33,7 @@ const projectBySlugQuery = `*[_type == "project" && slug.current == $slug][0]{
   _updatedAt,
   clientName,
   subtitle,
+  publishedAt,
   technologyUsed,
   url,
   backgroundColor,
