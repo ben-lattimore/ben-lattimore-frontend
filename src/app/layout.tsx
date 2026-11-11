@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import { AUTHOR_NAME, SITE_NAME, SITE_URL, alternatesFor, openGraphDefaults } from '@/lib/site';
 import "./globals.css";
 
@@ -42,6 +43,8 @@ export default function RootLayout({
     <html lang="en-GB">
       <body className={`${inter.className} antialiased`}>
         {children}
+        {/* Vercel Web Analytics: cookieless page views, production only. */}
+        <Analytics />
       </body>
     </html>
   );
